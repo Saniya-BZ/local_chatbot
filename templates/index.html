@@ -1,0 +1,186 @@
+
+
+<!-- # TESTTT PERFECT -->
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #chatbot {
+            width: 300px;
+            height: 400px;
+            position: fixed;
+            bottom: 0;
+            right: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            display: none;
+            flex-direction: column;
+            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #chatbot-header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #chatbot-messages {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: #e0e0e0;
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-start;
+        }
+
+        #chatbot-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #send-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-left: 5px;
+            border-radius: 5px;
+        }
+
+        #chatbot-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #close-btn {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="chatbot">
+        <div id="chatbot-header">
+            <h2>IIIT CampusBuddy</h2>
+            <span id="close-btn">&times;</span>
+        </div>
+        <div id="chatbot-messages"></div>
+        <div id="chatbot-input">
+            <input type="text" id="user-input" placeholder="Type a message...">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+    <button id="chatbot-toggle">Chat</button>
+    <script>
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbot = document.getElementById('chatbot');
+        const closeBtn = document.getElementById('close-btn');
+        const sendBtn = document.getElementById('send-btn');
+        const userInput = document.getElementById('user-input');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+
+        const createMessageElement = (text, isUser) => {
+            const message = document.createElement('div');
+            message.textContent = `${isUser ? 'User' : 'Bot'}: ${text}`;
+            message.classList.add('message', isUser ? 'user-message' : 'bot-message');
+            return message;
+        };
+
+        chatbotToggle.addEventListener('click', () => {
+            chatbot.style.display = 'flex';
+            chatbotToggle.style.display = 'none';
+            chatbotMessages.appendChild(createMessageElement('How can I assist you?', false));
+        });
+
+        closeBtn.addEventListener('click', () => {
+            chatbot.style.display = 'none';
+            chatbotToggle.style.display = 'block';
+        });
+
+        sendBtn.addEventListener('click', async () => {
+            const userText = userInput.value.trim();
+            if (userText) {
+                const userMessage = createMessageElement(userText, true);
+                chatbotMessages.appendChild(userMessage);
+                userInput.value = '';
+
+                try {
+                    const response = await fetch('/ask', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ query: userText })
+                    });
+                    const data = await response.json();
+                    const botMessage = createMessageElement(data.response, false);
+                    chatbotMessages.appendChild(botMessage);
+                    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        });
+
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
